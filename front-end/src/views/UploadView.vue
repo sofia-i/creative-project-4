@@ -161,13 +161,13 @@ export default {
         async editItem(item) {
             try {
                 await axios.put("/api/items/" + item._id, {
-                name: this.findItem.name,
+                    name: this.findActor.name,
                 });
-                this.findItem = null;
+                this.findActor = null;
                 this.getItems();
                 return true;
             } catch(error) {
-                //console.log(error);
+                console.log(error);
             }
         },
         async deleteItem(item) {

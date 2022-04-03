@@ -34,4 +34,10 @@ nav a {
 nav a.router-link-exact-active {
   color: #42b983;
 }
+
+.footer {
+  padding: 15px;
+  margin-top: 20px;
+  background-color:#e6eeff;
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="actors">
-    <h1>Find your castmembers from these actors!</h1>
+    <h1>Look at your choices of actors!</h1>
 
     <h4>Upload an actor:  <router-link to="/upload">Upload</router-link></h4>
 

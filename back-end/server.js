@@ -83,7 +83,7 @@ app.post('/api/casting', async(req, res) => {
     charactername: req.body.charactername,
     path: req.body.actorpath,
   });
-  console.log(casting);
+  // console.log(casting);
   try {
     await Castlist.updateOne({moviename:req.body.moviename}, 
       {$push:{"castmembers":casting}})
@@ -130,10 +130,12 @@ app.delete("/api/items/:id", async (req, res) => {
 
 //edit an item
 app.put("/api/items/:id", async (req, res) => {
+  console.log("in in the server");
   try {
     let item = await Item.findOne({
       _id: req.params.id
     });
+    console.log(item);
     item.name = req.body.name;
     item.save();
     res.sendStatus(200);

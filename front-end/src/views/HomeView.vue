@@ -59,7 +59,7 @@ img {
 
 .cast {
   border: 1px solid #000;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
