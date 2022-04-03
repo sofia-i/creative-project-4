@@ -1,9 +1,9 @@
 <template>
 <div class="casting">
     <h1>Assign an actor to the cast of your movie!</h1>
-    <p>Select your Movie</p>
+    <p>Select a Movie</p>
     <div class="form">
-      <input v-model="findMovieName" id="mvSuggestionsInput" placeholder="Search" onClick="getElementById('mvSuggestions').style.display = 'inline'">
+      <input autocomplete="off" v-model="findMovieName" id="mvSuggestionsInput" placeholder="Search" onClick="getElementById('mvSuggestions').style.display = 'block'">
       <div class="suggestions" id="mvSuggestions" v-if="movieSuggestions.length > 0">
         <div class="suggestion" v-for="m in movieSuggestions" :key="m.id" @click="selectMovie(m)">{{m.moviename}}
         </div>
@@ -12,7 +12,7 @@
 
     <p>Select an Actor</p>
     <div class="form">
-      <input v-model="findName" id="actorSuggestionsInput" placeholder="Search" onClick="getElementById('actorSuggestions').style.display = 'inline'">
+      <input autocomplete="off" v-model="findName" id="actorSuggestionsInput" placeholder="Search" onClick="getElementById('actorSuggestions').style.display = 'block'">
       <div class="suggestions" id="actorSuggestions" v-if="suggestions.length > 0" >
         <div class="suggestion" v-for="s in suggestions" :key="s.id" @click="selectItem(s)">{{s.name}}
         </div>
@@ -25,13 +25,13 @@
         <h4> What role is {{findActor.name}} playing? </h4>
         <div class="add">
             <div class="form">
-                <input v-model="characterName" placeholder="Character Name">
+                <input autocomplete="off" v-model="characterName" placeholder="Character Name">
                 <button @click="submit">Submit</button>
             </div>
             <div class="upload" v-if="addCasting">
                 <h2>{{addCasting.moviename}}</h2>
-                <div v-for="actor in addCasting.castmembers" :key="actor.id">
-                    {{actor.name}} playing {{actor.charactername}}
+                <div v-for="(actor,index) in addCasting.castmembers" :key="index">
+                    {{actor.name}} playing {{addCasting.roles.at(index)}}
                 </div>
             </div>
         </div>
@@ -104,7 +104,7 @@ export default {
         },
         async getMovies() {
           try {
-            let response = await axios.get("/api/castlists");
+            let response = await axios.get("/api/cast");
             this.movies = response.data;
           } catch(error) {
             console.log(error);
@@ -130,6 +130,14 @@ export default {
 </script>   
 
 <style scoped>
+    input {
+        autocomplete: off;
+    }
+
+    .form {
+        autocomplete: off;
+    }
+
     h2 {
         margin: 10px;
     }
@@ -151,26 +159,8 @@ export default {
     .cast-gallery {
         display: flex;
         flex-direction: row;
+        flex-wrap:wrap;
         justify-content: center;
         align-items: center;
-    }
-
-    /* Suggestions */
-    .suggestions {
-        width: 200px;
-        border: 1px solid #ccc;
-        margin: 0 auto;
-        display: none;
-    }
-
-    .suggestion {
-        min-height: 20px;
-        max-width: 30%;
-        margin: 0 auto;
-    }
-
-    .suggestion:hover {
-        background-color: #5BDEFF;
-        color: #fff;
     }
 </style>

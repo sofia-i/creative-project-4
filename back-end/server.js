@@ -25,8 +25,10 @@ mongoose.connect('mongodb://localhost:27017/cast', {
 
 const itemSchema = new mongoose.Schema({
   name: String,
-  charactername: String,
   path: String,
+  age: Number,
+  height: String,
+  nationality: String,
 });
 
 const Item = mongoose.model('Item', itemSchema);
@@ -34,6 +36,7 @@ const Item = mongoose.model('Item', itemSchema);
 const castSchema = new mongoose.Schema({
   moviename: String,
   castmembers: [itemSchema],
+  roles: [String],
 });
 
 const Castlist = mongoose.model('Castlist', castSchema);
@@ -51,8 +54,10 @@ app.post('/api/photos', upload.single('photo'), async (req, res) => {
 app.post('/api/items', async(req, res) => {
   const item = new Item({
     name: req.body.name,
-    charactername: "",
     path: req.body.path,
+    age: req.body.age,
+    height: req.body.height,
+    nationality: req.body.nationality,
   });
   try {
     await item.save();
@@ -63,10 +68,11 @@ app.post('/api/items', async(req, res) => {
   }
 });
 
-app.post('/api/castlists', async(req, res) => {
+app.post('/api/cast', async(req, res) => {
   const castlist = new Castlist({
     moviename: req.body.name,
     castmembers: [],
+    roles: [],
   });
   try {
     await castlist.save();
@@ -77,16 +83,17 @@ app.post('/api/castlists', async(req, res) => {
   }
 });
 
+//create a new casting
 app.post('/api/casting', async(req, res) => {
   let casting = new Item({
     name: req.body.actorname,
-    charactername: req.body.charactername,
     path: req.body.actorpath,
   });
-  // console.log(casting);
   try {
     await Castlist.updateOne({moviename:req.body.moviename}, 
       {$push:{"castmembers":casting}})
+    await Castlist.updateOne({moviename:req.body.moviename}, 
+      {$push:{"roles":req.body.charactername}})
     let castResult = await Castlist.findOne({moviename:req.body.moviename});
     res.send(castResult);
   } catch(error) {
@@ -105,7 +112,7 @@ app.get('/api/items', async(req, res) => {
   }
 });
 
-app.get('/api/castlists', async(req, res) => {
+app.get('/api/cast', async(req, res) => {
   try {
     let castlists = await Castlist.find();
     res.send(castlists);
@@ -128,16 +135,62 @@ app.delete("/api/items/:id", async (req, res) => {
   }
 });
 
+//delete a cast
+app.delete("/api/cast/:id", async (req, res) => {
+  try {
+    await Castlist.deleteOne({
+      _id: req.params.id
+    });
+    res.sendStatus(200);
+  } catch(error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+//delete a casting
+app.delete("/api/casting/:id", async(req, res) => {
+  try {
+    let castlistBefore = await Castlist.findOne({_id:req.params.id});
+
+    await Castlist.updateOne({_id:req.params.id}, 
+      {$pull:{castmembers: {name : req.body.actorname}}})
+    await Castlist.updateOne({_id:req.params.id}, 
+      {$pull:{roles: req.body.charactername}})
+
+    res.sendStatus(200);
+  } catch(error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
 //edit an item
 app.put("/api/items/:id", async (req, res) => {
-  console.log("in in the server");
   try {
     let item = await Item.findOne({
       _id: req.params.id
     });
-    console.log(item);
     item.name = req.body.name;
+    item.age = req.body.age;
+    item.nationality = req.body.nationality;
+    item.height = req.body.height;
     item.save();
+    res.sendStatus(200);
+  } catch(error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+//edit a cast
+app.put("/api/cast/:id", async (req, res) => {
+  try {
+    let cast = await Castlist.findOne({
+      _id: req.params.id
+    });
+    cast.moviename = req.body.moviename;
+    cast.save();
     res.sendStatus(200);
   } catch(error) {
     console.log(error);

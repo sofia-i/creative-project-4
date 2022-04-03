@@ -15,15 +15,22 @@
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Poppins, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
 }
 
+h1 {
+  border: 2px solid #000;
+  border-radius: 10px;
+  background-color: #eee;
+}
+
 nav {
   padding: 30px;
+  background-color: #FFF8E8;
 }
 
 nav a {
@@ -32,7 +39,7 @@ nav a {
 }
 
 nav a.router-link-exact-active {
-  color: #42b983;
+  color: #A67D25;
 }
 
 .footer {
@@ -40,4 +47,23 @@ nav a.router-link-exact-active {
   margin-top: 20px;
   background-color:#e6eeff;
 }
+
+/* Suggestions */
+  .suggestions {
+      width: fit-content;
+      margin: 0 auto;
+      display: none;
+      border: 1px solid #ccc;
+  }
+
+  .suggestion {
+      min-height: 20px;
+      width: 200px;
+      margin: 0 auto;
+  }
+
+  .suggestion:hover {
+      background-color: #5BDEFF;
+      color: #fff;
+  }
 </style>

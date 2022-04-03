@@ -8,9 +8,9 @@
       <div class="cast" v-for="castlist in castlists" :key="castlist.id">
         <h3>{{castlist.moviename}}</h3>
         <div class="characters">
-          <div class="character" v-for="castmember in castlist.castmembers" :key="castmember.id">
+          <div class="character" v-for="(castmember,index) in castlist.castmembers" :key="index">
             <img :src="castmember.path" />
-            <p>{{castmember.name}} as {{castmember.charactername}}</p>
+            <p>{{castmember.name}} as {{castlist.roles.at(index)}}</p>
           </div>
         </div>
       </div>
@@ -38,8 +38,9 @@ export default {
   methods: {
     async getCastlists() {
       try {
-          let repsonse = await axios.get("/api/castlists");
+          let repsonse = await axios.get("/api/cast");
           this.castlists = repsonse.data;
+          console.log("castlists");
           console.log(this.castlists);
       } catch(error) {
           console.log(error);
@@ -60,8 +61,9 @@ img {
 .cast {
   border: 1px solid #000;
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 10px auto;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -75,6 +77,7 @@ img {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .character {

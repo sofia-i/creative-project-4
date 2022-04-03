@@ -6,7 +6,13 @@
             <h2>Upload Actors</h2>
             <div class="add">
                 <div class="form">
-                    <input v-model="name" placeholder="Actor Name">
+                    <input v-model="name" placeholder="Name">
+                    <p/>
+                    <input v-model="age" placeholder="Age">
+                    <p/>
+                    <input v-model="nationality" placeholder="Nationality">
+                    <p/>
+                    <input v-model="height" placeholder="Height">
                     <p/>
                     <input type="file" name="photo" @change="fileChanged">
                     <p/>
@@ -20,10 +26,10 @@
         </div>
 
         <div class="uploadItem">
-            <h2>Create a Cast</h2>
+            <h2>Create a Movie to Cast</h2>
             <div class="addcast">
                 <div class="form">
-                    <input v-model="castname" placeholder="Movie Name">
+                    <input v-model="castname" placeholder="Movie Title">
                     <p/>
                     <button @click="uploadcast">Upload</button>
                 </div>
@@ -35,23 +41,68 @@
     </div>
     <h1>Edit</h1>
     <div class="edit">
-        <h2>Edit Actor</h2>
-        <div class="form">
-            <input v-model="findName" id="actorSuggestionsInput" placeholder="Search" onClick="getElementById('actorSuggestions').style.display = 'inline'">
-            <div class="suggestions" id="actorSuggestions" v-if="suggestions.length > 0" >
-                <div class="suggestion" v-for="s in suggestions" :key="s.id" @click="selectItem(s)">
-                    {{s.name}}
+        <div class="editActor">
+            <h2>Edit Actor</h2>
+            <div class="form">
+                <input autocomplete="off" v-model="findName" id="actorSuggestionsInput" placeholder="Search" onClick="getElementById('actorSuggestions').style.display = 'block'">
+                <div class="suggestions" id="actorSuggestions" v-if="suggestions.length > 0" >
+                    <div class="suggestion" v-for="s in suggestions" :key="s.id" @click="selectItem(s)">
+                        {{s.name}}
+                    </div>
                 </div>
             </div>
+            <div class="editItem" v-if="findActor">
+                Modified name: <input autocomplete="off" v-model="findActor.name">
+                <p/>
+                Modified age: <input autocomplete="off" v-model="findActor.age">
+                <p/>
+                Modified height: <input autocomplete="off" v-model="findActor.height">
+                <p/>
+                Modified nationality: <input autocomplete="off" v-model="findActor.nationality">
+                <p></p>
+                <img :src="findActor.path" />
+            </div>
+            <div class="actions" v-if="findActor">
+                <button @click="editItem(findActor)">Edit</button>
+                <button @click="deleteItem(findActor)">Delete</button>
+            </div>
         </div>
-        <div class="editItem" v-if="findActor">
-            <input v-model="findActor.name">
-            <p></p>
-            <img :src="findActor.path" />
-        </div>
-        <div class="actions" v-if="findActor">
-            <button @click="deleteItem(findActor)">Delete</button>
-            <button @click="editItem(findActor)">Edit</button>
+        <div class="editMovie">
+            <h2>Edit Movie</h2>
+            <div class="form">
+                <input autocomplete="off" v-model="findMovieName" id="mvSuggestionsInput" placeholder="Search" onClick="getElementById('mvSuggestions').style.display = 'block'">
+                <div class="suggestions" id="mvSuggestions" v-if="movieSuggestions.length > 0" >
+                    <div class="suggestion" v-for="m in movieSuggestions" :key="m.id" @click="selectMovie(m)">
+                        {{m.moviename}}
+                    </div>
+                </div>
+            </div>
+            <div class="movieEdits">
+                <div class="changeTitle movieEdit" v-if="findCast">
+                    <h3>Edit Title</h3>
+                    Modified movie title: <input autocomplete="off" v-model="findCast.moviename">
+                    <p></p>
+                    <div class="actions" v-if="findCast">
+                        <button @click="editCast(findCast)">Edit Movie</button>
+                        <button @click="deleteCast(findCast)">Delete Movie</button>
+                    </div>
+                </div>
+                <div class="changeCasting movieEdit" v-if="findCast">
+                    <h3>Delete a Casting</h3>
+                    <div class="characters">
+                        <div class="character" v-for="(castmember,index) in findCast.castmembers" :key="castmember.id">
+                            <p> {{castmember.name}} playing <strong>{{findCast.roles.at(index)}}</strong></p>
+                            <p/>
+                            <img :src="castmember.path" />
+                             <div class="actions" v-if="findCast">
+                                <button @click="deleteCasting(castmember.name, findCast.roles.at(index))">Delete Casting</button>
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -64,6 +115,9 @@ export default {
     data() {
         return {
             name: "",
+            age: "",
+            height: "",
+            nationality: "",
             file: null,
             addItem: null,
             castname: "",
@@ -76,6 +130,8 @@ export default {
             findMovieName: "",
             findActor: null,
             findCast: null,
+            roles: [],
+            charSuggestions: [],
         }
     },
     computed: {
@@ -83,7 +139,6 @@ export default {
             let queryInLowerCase = this.findName.toLowerCase();
             let items = this.items;
 
-            //console.log(items);
             let searchItems = items.filter(function(i) {
                 return i.name.toLowerCase().startsWith(queryInLowerCase);
             });
@@ -114,7 +169,7 @@ export default {
         },
         async getMovies() {
           try {
-            let response = await axios.get("/api/castlists");
+            let response = await axios.get("/api/cast");
             this.movies = response.data;
           } catch(error) {
             console.log(error);
@@ -132,8 +187,11 @@ export default {
                     this.name = "untitled";
                 }
                 let r2 = await axios.post('/api/items', {
-                name: this.name,
-                path: r1.data.path
+                    name: this.name,
+                    age: parseInt(this.age),
+                    height: this.height,
+                    nationality: this.nationality,
+                    path: r1.data.path
                 });
                 this.addItem = r2.data;
             } catch (error) {
@@ -142,8 +200,8 @@ export default {
         },
         async uploadcast() {
             try {
-                let r1 = await axios.post('/api/castlists', {
-                name: this.castname,
+                let r1 = await axios.post('/api/cast', {
+                    name: this.castname,
                 });
                 this.addCast = r1.data;
             } catch (error) {
@@ -156,14 +214,22 @@ export default {
         },
         selectMovie(movie) {
           this.findMovieName= movie.moviename;
-          this.findMovie = movie;
+          this.findCast = movie;
+          this.selectRoles(movie);
+        },
+        selectRoles(cast) {
+            this.roles = cast.roles;
         },
         async editItem(item) {
             try {
                 await axios.put("/api/items/" + item._id, {
                     name: this.findActor.name,
+                    age: this.findActor.age,
+                    height: this.findActor.height,
+                    nationality: this.findActor.nationality,
                 });
                 this.findActor = null;
+                this.findName = "";
                 this.getItems();
                 return true;
             } catch(error) {
@@ -180,17 +246,62 @@ export default {
                 //console.log(error);
             }
         },
+        async editCast(cast) {
+            try {
+                await axios.put("/api/cast/" + cast._id, {
+                    moviename: this.findCast.moviename,
+                });
+                this.findCast = null;
+                this.findMovieName = "";
+                this.getMovies();
+                return true;
+            } catch(error) {
+                console.log(error);
+            }
+        },
+        async deleteCast(cast) {
+            try {
+                await axios.delete("/api/cast/" + cast._id);
+                this.findMovieName = "";
+                this.findCast = null;
+                this.getMovies();
+                return true;
+            } catch(error) {
+                //console.log(error);
+            }
+        },
+        async deleteCasting(name, charName) {
+            console.log("into delete casting");
+            console.log("charName " + charName);
+            try {
+                await axios.delete("/api/casting/" + this.findCast._id, {
+                    data: {
+                        actorname: name,
+                        charactername: charName,
+                    }
+                });
+                this.findMovieName = "";
+                this.findCast = null;
+                this.getMovies();
+                return true;
+            } catch(error) {
+                console.log(error);
+            }
+        },
     },
 }
 </script>
 
 <style scoped>
+    
+
     img {
         max-width: 200px;
     }
     .upload {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         justify-content: space-around;
         align-items: top;
     }
@@ -199,22 +310,18 @@ export default {
         display: none;
     }
 
-    /* Suggestions */
-    .suggestions {
-        width: 200px;
-        border: 1px solid #ccc;
-        margin: 0 auto;
+    #mvSuggestions {
         display: none;
     }
 
-    .suggestion {
-        min-height: 20px;
-        max-width: 30%;
-        margin: 0 auto;
+    .movieEdits {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: top;
     }
 
-    .suggestion:hover {
-        background-color: #5BDEFF;
-        color: #fff;
+    .movieEdit {
+        margin: 10px;
     }
 </style>

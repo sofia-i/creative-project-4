@@ -8,6 +8,9 @@
       <div class="cast" v-for="item in items" :key="item.id">
         <img :src="item.path" />
         <h2>{{item.name}}</h2>
+        <p v-if="item.age">{{ item.age }} years old</p>
+        <p> {{item.height}} </p>
+        <p> {{item.nationality}} </p>
       </div>
     </section>
   </div>
@@ -45,7 +48,6 @@ export default {
 
 <style scoped>
   .cast {
-    max-width: 20%;
     margin: 10px;
   }
   .cast img {
@@ -55,7 +57,6 @@ export default {
   }
 
   .cast h2 {
-      min-height: 66px;
       margin: 5px;
   }
 
@@ -64,5 +65,6 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
   }
 </style>
